@@ -59,10 +59,10 @@ Pushing the empty branch straight away is the lock: the next session's preflight
 ## 4. Implement
 
 - Follow every gate in the settings.
-- Write the failing test first for logic and bugs.
+- For logic and bugs, write the test first. Under `end-only` you cannot watch it fail yet, so make sure by reading it that it asserts the behaviour the change adds, not merely that the code runs.
 - Run what the *Test cadence* allows:
   - `inner-loop`: run only `<build>` and `<fast tests>` as you go.
-  - `end-only`: run no build and no tests while implementing. Still write the tests alongside the code; they first run in step 5. Finish every acceptance criterion before you move on.
+  - `end-only`: run no build and no tests while implementing; they first run in step 5. Finish every acceptance criterion before you move on.
 - **If the same failure comes back twice, consult the advisor before a third attempt.** This holds in step 5 too.
 - If something is wrong outside the brief, do not fix it. Note it under *Follow-ups* in the report.
 

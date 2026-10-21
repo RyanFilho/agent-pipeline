@@ -37,7 +37,7 @@ Slice **vertically**: each issue delivers something observable, end to end, and 
 - [ ] **Verify** names the tests that prove it and, when the settings' *Visual QA* is `required`, the screens and widths to check for UI work
 - [ ] when the settings turn *Verify after deploy* `on`: that section holds one exact check and what it must show, only for what nothing but the deployed app can prove, and is blank otherwise
 - [ ] no design question is left open: the developer chooses only between equivalent implementations
-- [ ] it has a type label, an area label and a priority (`P1` to `P3`)
+- [ ] it has one label from each group the settings list under *Every issue carries*; if that row is missing, a type label, an area label and a priority (`P1` to `P3`)
 - [ ] anything it depends on is a separate issue, linked as a blocker
 
 Two slices that change the same file, or that carry an area the settings serialise, cannot run in parallel. Either order them with a blocker, or merge them into one slice.
@@ -49,7 +49,7 @@ Show the user one table before creating anything:
 | # | Title | Type | Area | Priority | Blocked by |
 |---|---|---|---|---|---|
 
-On their go-ahead, create each issue with the sections of the project's issue template, and link the spec:
+On their go-ahead, create each issue with the sections of the project's issue template and the labels from step 3, and link the spec:
 
 ```bash
 gh issue create --title "<title>" --body-file <file> --label "type: <t>" --label "area: <a>" --label "P<n>"
