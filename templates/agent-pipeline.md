@@ -1,6 +1,6 @@
 # Agent pipeline: project settings
 
-Read by `/agent-pipeline:plan`, `/agent-pipeline:dispatch`, `/agent-pipeline:ship-issue` and the `agent-pipeline:pr-reviewer` agent. Written by `/agent-pipeline:adopt`. Keep it short: every pipeline session reads it.
+Read by `/agent-pipeline:plan`, `/agent-pipeline:dispatch`, `/agent-pipeline:ship-issue`, `/agent-pipeline:verify` and the `agent-pipeline:pr-reviewer` agent. Written by `/agent-pipeline:adopt`. Keep it short: every pipeline session reads it.
 
 ## Repository
 
@@ -23,7 +23,9 @@ A setting left out of this file takes its default, which is how the pipeline beh
 
 - **Test cadence:** `inner-loop` <!-- default: build and fast tests while implementing, slow tests once at the end. Or end-only: nothing while implementing, then every command above once, in full, before the PR -->
 - **Visual QA:** `required` <!-- default: check each touched screen in every theme and at phone, tablet and desktop widths. Or none: the project has no UI, or does not gate on rendered checks -->
-- **Verify after deploy:** `off` <!-- default: every issue closes when its PR merges. Or on: an issue whose "Verify after deploy" section is filled in stays open after the merge, labelled verify-after-deploy, until that check passes against the deployed app -->
+- **Verify after deploy:** `off` <!-- default: every issue closes when its PR merges. Or on: an issue whose "Verify after deploy" section is filled in stays open after the merge, labelled verify-after-deploy, until /agent-pipeline:verify sees that check pass against the deployed app -->
+- **Deployed app:** `<https://app.example.com>` <!-- only when Verify after deploy is on: the base URL the checks run against -->
+- **Deployed version:** `workflow <deploy.yml>` <!-- only when Verify after deploy is on: how /agent-pipeline:verify tells which commit is live. workflow <file>: the latest successful run of that workflow on the default branch. Or command <cmd>: a read-only command that prints the live commit SHA, such as curl -s <url>/version -->
 - **No CI checks:** `blocked` <!-- default: a PR on which no CI check runs is not merged. Or green: CI is path-filtered, so a PR with no checks (docs, agent config) counts as green -->
 
 ## Labels
