@@ -1,7 +1,7 @@
 ---
 name: plan
-description: Act as the agent pipeline's planner - turn a feature idea into a spec and a set of small ready-for-agent GitHub issues, or triage existing issues until an agent can ship each one from its body alone. Started as "/agent-pipeline:plan <idea or issue numbers>".
-argument-hint: <feature idea, or issue numbers to triage>
+description: Act as the agent pipeline's planner - turn a feature idea into a spec and a set of small ready-for-agent GitHub issues, or rework existing issues until an agent can ship each one from its body alone. Started as "/agent-pipeline:plan <idea or issue numbers>".
+argument-hint: <feature idea, or issue numbers to make ready>
 disable-model-invocation: true
 ---
 
@@ -13,7 +13,7 @@ Run this at your strongest model and high effort: decisions made here are cheap 
 
 Read `.claude/agent-pipeline.md` first for the repository, labels, gates and where the glossary, decisions and specs live. If it is missing, tell the user to run `/agent-pipeline:adopt`.
 
-If the argument is one or more issue numbers, skip to [Triage](#triage-an-existing-issue).
+If the argument is one or more issue numbers, skip to [Make an existing issue ready](#make-an-existing-issue-ready).
 
 ## 1. Understand before you design
 
@@ -25,7 +25,7 @@ If the argument is one or more issue numbers, skip to [Triage](#triage-an-existi
 
 Anything larger than a couple of files gets a spec in the specs folder before it gets issues: the goal, the design you settled on, what you rejected and why, and the open risks. Use the glossary's terms. If a decision is hard to reverse, surprising without context and the result of a real trade-off, record it as an ADR too.
 
-Commit the spec on a `docs/` branch and open a PR, or leave it for the user to review, whichever they prefer. Ask.
+Commit the spec on a `docs/` branch and open a PR, or leave it for the user to review, whichever they prefer. Ask. Developers are cut from the default branch, so an issue that links the spec gets `ready-for-agent` only once the spec is merged there.
 
 ## 3. Slice it into issues
 
@@ -72,7 +72,9 @@ Label each issue that meets every point in step 3 with `ready-for-agent`. Label 
 
 End with the table, now with issue numbers and labels, and one line: *Run `/agent-pipeline:dispatch` in a session at medium effort, in the permission mode the developers should use.*
 
-## Triage an existing issue
+## Make an existing issue ready
+
+Issues filed from the project's templates start as `ready-for-agent`: the developer's preflight checks them against step 3 and hands back any that fall short, labelled `needs-info` with what is missing. Run this for those, for a developer's filed follow-ups (which carry no `ready-for-agent` until someone decides to build them), and for anything filed without a template.
 
 For each number:
 
@@ -80,4 +82,4 @@ For each number:
 2. Check it against the list in step 3.
 3. If something is missing and you can fill it from the code, edit the body (`gh issue edit <n> --body-file <file>`). Do not post the brief as a comment: the body is what the developer reads.
 4. If only the user can answer, ask them, batched across all the issues.
-5. When it meets every point, swap `needs-triage` for `ready-for-agent`. If it is too big, split it as in step 3 and close it in favour of the children.
+5. When it meets every point, remove `needs-info` and `blocked` if present, and add `ready-for-agent`. If it is too big, split it as in step 3 and close it in favour of the children.

@@ -1,6 +1,6 @@
 name: Chore
-description: Maintenance, refactoring, tooling, dependencies or documentation
-labels: ["type: chore", "needs-triage"]
+description: Maintenance, refactoring, tooling or dependencies
+labels: ["type: chore", "ready-for-agent"]
 body:
   - type: textarea
     id: what

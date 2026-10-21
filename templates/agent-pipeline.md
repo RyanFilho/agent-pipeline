@@ -1,6 +1,6 @@
 # Agent pipeline: project settings
 
-Read by `/agent-pipeline:dispatch`, `/agent-pipeline:ship-issue` and the `agent-pipeline:pr-reviewer` agent. Written by `/agent-pipeline:adopt`. Keep it short: every pipeline session reads it.
+Read by `/agent-pipeline:plan`, `/agent-pipeline:dispatch`, `/agent-pipeline:ship-issue` and the `agent-pipeline:pr-reviewer` agent. Written by `/agent-pipeline:adopt`. Keep it short: every pipeline session reads it.
 
 ## Repository
 
@@ -24,6 +24,7 @@ A setting left out of this file takes its default, which is how the pipeline beh
 - **Test cadence:** `inner-loop` <!-- default: build and fast tests while implementing, slow tests once at the end. Or end-only: nothing while implementing, then every command above once, in full, before the PR -->
 - **Visual QA:** `required` <!-- default: check each touched screen in every theme and at phone, tablet and desktop widths. Or none: the project has no UI, or does not gate on rendered checks -->
 - **Verify after deploy:** `off` <!-- default: every issue closes when its PR merges. Or on: an issue whose "Verify after deploy" section is filled in stays open after the merge, labelled verify-after-deploy, until that check passes against the deployed app -->
+- **No CI checks:** `blocked` <!-- default: a PR on which no CI check runs is not merged. Or green: CI is path-filtered, so a PR with no checks (docs, agent config) counts as green -->
 
 ## Labels
 
@@ -31,9 +32,9 @@ A setting left out of this file takes its default, which is how the pipeline beh
 |---|---|
 | Ready for an agent | `ready-for-agent` |
 | Claim lock | `in-progress` |
-| Not available | `blocked`, `deferred`, `needs-triage`, `needs-info`, `ready-for-human`, `verify-after-deploy` |
+| Not available | `blocked`, `deferred`, `needs-info`, `ready-for-human`, `verify-after-deploy` |
 | Every issue carries | one `type:`, one `area:`, and one of `P1` to `P3` <!-- the label groups every issue needs, follow-ups included, or "none" --> |
-| Type → branch prefix | `type: feature` → `feat`, `type: bug` → `fix`, `type: chore` → `chore`, `type: docs` → `docs` |
+| Type → branch prefix | `type: feature` → `feat`, `type: bug` → `fix`, `type: chore` → `chore`, `type: docs` → `docs` <!-- a new prefix also needs its git push entries in .claude/settings.json --> |
 | Never two in flight at once | `area: db` <!-- areas whose work collides, e.g. migrations --> |
 | Review with Opus | `P1`, `area: auth`, `area: db` |
 

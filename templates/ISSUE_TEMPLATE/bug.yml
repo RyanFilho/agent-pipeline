@@ -1,6 +1,6 @@
 name: Bug
 description: Something is broken or behaves incorrectly
-labels: ["type: bug", "needs-triage"]
+labels: ["type: bug", "ready-for-agent"]
 body:
   - type: textarea
     id: summary
@@ -47,3 +47,12 @@ body:
       description: Checkable statements, starting with the test that fails today and passes once this is fixed.
       value: |
         - [ ]
+    validations:
+      required: true
+
+  - type: textarea
+    id: verify
+    attributes:
+      label: Verify
+      description: Which tests prove the fix, and which slow tests to run once at the end. For UI, the screens to check, in which themes and at which widths.
+      placeholder: Regression test in <test file>. End-to-end: <spec>.

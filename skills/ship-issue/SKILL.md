@@ -9,7 +9,9 @@ disable-model-invocation: true
 
 You are a developer in the agent pipeline. **The issue is your whole brief**: you were started without the conversation that produced it, and you do not need it. Its acceptance criteria are the definition of done, and anything it puts out of scope stays out.
 
-Read `.claude/agent-pipeline.md` first. It names this project's repository, commands, labels and gates; below, `<build>`, `<fast tests>`, `<slow tests>` and `<default branch>` mean the values there, and *Test cadence*, *Visual QA* and *Verify after deploy* are its Workflow settings. A Workflow setting the file leaves out takes its default: `inner-loop`, `required` and `off`. If the file is missing, stop and report `Blocked: run /agent-pipeline:adopt in this project first`.
+Read `.claude/agent-pipeline.md` first. It names this project's repository, commands, labels and gates; below, `<build>`, `<fast tests>`, `<slow tests>` and `<default branch>` mean the values there, and *Test cadence*, *Visual QA*, *Verify after deploy* and *No CI checks* are its Workflow settings. A Workflow setting the file leaves out takes its default: `inner-loop`, `required`, `off` and `blocked`. If the file is missing, stop and report `Blocked: run /agent-pipeline:adopt in this project first`.
+
+Run every command below as its own call, written out literally: no pipes, `&&`, `||`, `;` or shell variables. Some hosts refuse compound commands inside a worktree. Read the output yourself instead of filtering it.
 
 ## 0. Work in your own worktree
 
@@ -23,25 +25,36 @@ If the path contains `/worktrees/`, this session has a worktree of its own: carr
 
 ```bash
 git fetch origin
-gh issue view $ARGUMENTS --json number,title,state,labels,assignees,body,comments
-gh pr list --state all --search "$ARGUMENTS" --json number,state,title,headRefName,body
-git ls-remote --heads origin | grep -E "refs/heads/[a-z]+/$ARGUMENTS-" || true
+gh issue view $ARGUMENTS --json number,title,state,labels,assignees,body,closedByPullRequestsReferences
+git ls-remote --heads origin
+gh api repos/<owner>/<repo>/issues/$ARGUMENTS --jq .issue_dependencies_summary.blocked_by
 ```
+
+`closedByPullRequestsReferences` lists the open and merged PRs that link this issue; in the `ls-remote` output, look for a branch named `<prefix>/$ARGUMENTS-<slug>`. Do not search PRs by the bare number: that matches every PR containing those digits.
 
 Stop and send the step 7 report with `Blocked:` filled in when any of these is true:
 
-- the issue is closed, or a merged PR says `Fixes #$ARGUMENTS`
+- the issue is closed, or a merged PR links it
 - it is labelled `verify-after-deploy`: it is built and merged, and waits only on a check against the deployed app
 - an open PR or a remote branch already names it, which means another session is on it
 - it carries a label the settings list as not available
-- it has an open blocker (`gh api repos/<owner>/<repo>/issues/$ARGUMENTS --jq .issue_dependencies_summary.blocked_by` is above 0)
-- the acceptance criteria are missing or cannot be checked: say which, and do not guess
+- it has an open blocker (the `gh api` count is above 0)
+
+**Then check that the issue is ready**, because no person checked it before it reached you. It is ready when:
+
+- its acceptance criteria are checkable statements, not intentions
+- *Where in the code* names files or entry points that exist
+- *Verify* names the tests that prove it
+- no design question is left open: you would only choose between equivalent implementations
+- it has a `type:` label, which gives the branch prefix
+
+If any point fails, stop and report `Blocked: not ready - <each missing point, one phrase each>`. Do not guess, and do not fill the gap yourself: a person decides what the issue means.
 
 If it is not labelled with the claim lock yet, claim it: `gh issue edit $ARGUMENTS --add-label in-progress --add-assignee @me`.
 
 ## 2. Read the brief, and only what it names
 
-Read the issue body, plus the latest triage brief in its comments if there is one. Then read the glossary terms it uses, the spec section or ADR it links, and the files it says it touches. Opening those files loads any matching `.claude/rules/`. Do not survey the codebase beyond that.
+Read the issue body: it is the whole brief, and comments do not add to it. Then read the glossary terms it uses, the spec section or ADR it links, and the files it says it touches. Opening those files loads any matching `.claude/rules/`. Do not survey the codebase beyond that.
 
 If the brief leaves more than one reasonable design open, consult the advisor before you choose.
 
@@ -106,6 +119,11 @@ fast <passed>/<total> · slow <suite>: <passed>/<total>
 ## Follow-ups
 ```
 
+**When `gh pr checks` says `no checks reported`**, it exits 1 at once, and that is not a failure to fix. Workflows can take a few seconds to register after a push, so run `gh run list --branch <branch> --json name,status,headSha` and look for runs on your last commit. If there are any, or this is your first look, run `gh pr checks <pr> --watch --fail-fast` again. If it still reports no checks and no run exists, no CI applies to this PR (path-filtered CI often skips docs-only changes). Then:
+
+- *No CI checks* `green`: report `CI none`; the reviewer treats it as green.
+- *No CI checks* `blocked`: report `CI none` and `Blocked: no CI checks ran on this PR`.
+
 If CI fails, fix it and push. After two failed attempts, stop and report it as blocked. **Do not merge**: the reviewer merges.
 
 ## 7. Report
@@ -113,11 +131,13 @@ If CI fails, fix it and push. After two failed attempts, stop and report it as b
 Your last message is the handoff, and the lead may see only its first 400 characters. Use exactly this format and nothing else:
 
 ```text
-#<n> -> PR #<m> | fast <p>/<t> | slow <p>/<t> | CI <green|red>
+#<n> -> PR #<m> | fast <p>/<t> | slow <p>/<t> | CI <green|red|none>
 Judgment calls: <one line, or none>
 Follow-ups: <one line per issue worth filing, or none>
 Blocked: <reason, or none>
 ```
+
+If you stopped before opening a PR, the first line is `#<n> -> no PR`.
 
 ## When the lead sends review feedback
 
@@ -125,7 +145,7 @@ A message like `Review on PR #<m>` means the reviewer commented on the PR:
 
 1. Read the comments with `gh pr view <m> --comments`.
 2. Fix what they ask, within the brief.
-3. Test as the cadence says: under `inner-loop`, run the fast tests; under `end-only`, make every fix first, then run `<build>` and `<fast tests>` once. Push, and wait for CI.
+3. Test as the cadence says: under `inner-loop`, run the fast tests; under `end-only`, make every fix first, then run `<build>` and `<fast tests>` once. Push, and wait for CI as in step 6.
 4. Send the step 7 report again.
 
 If the branch is behind or conflicts with the default branch, merge `origin/<default branch>` into it and resolve the conflicts. Do not rebase or force push.

@@ -37,7 +37,7 @@ Report only what should block the merge or is a real bug. Skip style preferences
 
 - **Blocking findings**: post them as one PR comment (`gh pr comment <m> --body-file -`), each as `path:line`, what is wrong, and why, followed by the operations list if there is one. Use a comment rather than a review, because GitHub does not let an author request changes on their own PR and pipeline sessions usually sign in as that author.
 - **Behind or conflicting** (`mergeStateStatus` is `BEHIND` or `DIRTY`): do not merge. The developer merges the default branch in.
-- **Clean**: run `gh pr checks <m> --watch --fail-fast`. When every check is green:
+- **Clean**: run `gh pr checks <m> --watch --fail-fast`. If it says `no checks reported`, that is not a red check: run `gh run list --branch <head> --json name,status,headSha`, and if a run on the head commit exists, watch the checks again. If none exists, no CI applies to this PR. Then follow the settings' *No CI checks*: `green` counts it as green, and `blocked` (the default) means you answer `CI-RED #<m>: no CI checks ran` and do not merge. When every check is green, or there are none and that counts as green:
   1. If there is an operations list, post it as a PR comment first, so the record outlives the merge.
   2. Merge with `gh pr merge <m> <merge method>`.
   3. Confirm `gh pr view <m> --json state` reads `MERGED`.
@@ -46,15 +46,15 @@ Report only what should block the merge or is a real bug. Skip style preferences
 
   Do not pass `--delete-branch`: it also deletes the local branch, which fails while the developer's worktree has it checked out.
 
-Never pass `--admin`, and never merge with a failing or pending check.
+Never pass `--admin`, and never merge with a failing or pending check. Run each command as its own call, with no pipes or `&&`.
 
 ## 4. Answer
 
 Your whole answer is one of these lines, and nothing else:
 
 ```text
-MERGED #<m> (fixes #<n>) | CI green
-MERGED #<m> (refs #<n>) | CI green | verify after deploy
+MERGED #<m> (fixes #<n>) | CI <green|none>
+MERGED #<m> (refs #<n>) | CI <green|none> | verify after deploy
 CHANGES #<m>: <up to three bullets, path:line and the problem; the full list is on the PR>
 CI-RED #<m>: <check name>, <one-line cause>
 CONFLICT #<m>: <behind the default branch, or the conflicting files>

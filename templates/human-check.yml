@@ -1,0 +1,48 @@
+# /agent-pipeline:adopt copies this to .github/ISSUE_TEMPLATE/human-check.yml, without this
+# comment, when the user wants it: a check only a person can do. Agents never take these issues.
+name: Human check
+description: A check only a person can make, such as on a real device or by ear, eye or taste
+labels: ["ready-for-human"]
+body:
+  - type: dropdown
+    id: why-human
+    attributes:
+      label: Why a person
+      options:
+        - A real device or hardware
+        - A native speaker or reader
+        - Listening, look or feel
+        - Taste or judgement
+        - Access or an account an agent does not have
+        - Other (say below)
+    validations:
+      required: true
+
+  - type: textarea
+    id: check
+    attributes:
+      label: The check
+      description: Exactly what to do, and where.
+    validations:
+      required: true
+
+  - type: textarea
+    id: passes
+    attributes:
+      label: What passes
+      description: What the person should see, hear or find.
+    validations:
+      required: true
+
+  - type: textarea
+    id: if-it-fails
+    attributes:
+      label: If it fails
+      description: What to record, and whether to file a bug for an agent.
+
+  - type: input
+    id: from
+    attributes:
+      label: Comes from
+      description: The issue or PR this check belongs to.
+      placeholder: "#<n>"
