@@ -20,7 +20,7 @@ Then read the `.claude/rules/*.md` files whose `paths:` match the changed files,
 
 ## 2. Review on two axes
 
-**Spec.** Every acceptance criterion in the issue is met, and the PR body shows the test or check that proves it. Nothing out of scope came along.
+**Spec.** Every acceptance criterion in the issue is met, and the PR body shows the test or check that proves it. Nothing out of scope came along. The PR opens with the right keyword: `Refs #<n>` when the settings turn *Verify after deploy* `on` and the issue's *Verify after deploy* section is filled in (not blank and not `_No response_`), and `Fixes #<n>` otherwise. A wrong keyword blocks: it either closes the issue before its check or leaves it open for good.
 
 **Standards and correctness.** Check the gates in the settings, the rules for the touched paths, and in particular:
 
@@ -39,6 +39,7 @@ Report only what should block the merge or is a real bug. Skip style preferences
   1. Merge with `gh pr merge <m> <merge method>`.
   2. Confirm `gh pr view <m> --json state` reads `MERGED`.
   3. Delete the remote branch with `git push origin --delete <head>`.
+  4. If the PR opens with `Refs #<n>`, mark the issue as waiting on the deployed app, so no one picks it up again: `gh issue edit <n> --add-label verify-after-deploy --remove-label ready-for-agent`. Leave it open.
 
   Do not pass `--delete-branch`: it also deletes the local branch, which fails while the developer's worktree has it checked out.
 
@@ -50,6 +51,7 @@ Your whole answer is one of these lines, and nothing else:
 
 ```text
 MERGED #<m> (fixes #<n>) | CI green
+MERGED #<m> (refs #<n>) | CI green | verify after deploy
 CHANGES #<m>: <up to three bullets, path:line and the problem; the full list is on the PR>
 CI-RED #<m>: <check name>, <one-line cause>
 CONFLICT #<m>: <behind the default branch, or the conflicting files>

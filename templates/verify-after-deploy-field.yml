@@ -1,0 +1,8 @@
+  # /agent-pipeline:adopt appends this field to the end of each issue template's body, without
+  # this comment, only when the project's "Verify after deploy" setting is on.
+  - type: textarea
+    id: verify-after-deploy
+    attributes:
+      label: Verify after deploy
+      description: Only for what nothing but the deployed app can prove, such as a real request, a production setting or seeded data. Give one exact check and what it must show. Leave it blank otherwise, and the issue closes when its PR merges.
+      placeholder: "GET /api/<route> on the deployed app returns 200 with <field> set."

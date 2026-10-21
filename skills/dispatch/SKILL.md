@@ -69,7 +69,7 @@ Without a session tool (in a plain terminal), tell the user which issues are cla
 
 **6. When the reviewer answers:**
 
-- `MERGED`: remove the claim lock; the issue closes through `Fixes #<n>`. File each of the developer's *Follow-ups* as a `needs-triage` issue, and offer to archive the developer session.
+- `MERGED`: remove the claim lock; the issue closes through `Fixes #<n>`. When the line ends `verify after deploy`, the PR said `Refs #<n>` instead: the issue stays open with the `verify-after-deploy` label, and you do nothing more with it. File each of the developer's *Follow-ups* as a `needs-triage` issue, and offer to archive the developer session.
 - `CHANGES`, `CI-RED` or `CONFLICT`: send the developer session one line, `Review on PR #<m>: address it, push, and report again.` The detail is on the PR. If the same PR gets `CHANGES` a second time, take it to the user instead.
 
 **7. Repeat** from step 1 until nothing is left to start and nothing is in flight.
@@ -80,3 +80,5 @@ Ask only for product or design decisions, and batch them into one message. End e
 
 | Issue | PR | State | Follow-ups |
 |---|---|---|---|
+
+When the settings turn *Verify after deploy* `on`, list under the table the open issues labelled `verify-after-deploy` (`gh issue list --label verify-after-deploy --state open --json number,title`). They are merged and wait on a check against the deployed app, which the user or a project skill runs, not the pipeline.

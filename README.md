@@ -63,17 +63,29 @@ To triage existing issues instead of planning new ones, run `/agent-pipeline:pla
 
 It inspects the repository, shows what it found, and asks once for anything it had to guess. Then, on a branch:
 
-- **`.claude/agent-pipeline.md`**: the repository, merge method, build and test commands, labels, areas that must not run in parallel, and the project's gates. Every pipeline session reads it.
+- **`.claude/agent-pipeline.md`**: the repository, merge method, build and test commands, the [workflow settings](#workflow-settings), labels, areas that must not run in parallel, and the project's gates. Every pipeline session reads it.
 - **`.claude/settings.json`**:
   - permission allow and deny lists, so the pipeline runs without prompts but can never push to the default branch or force push
   - the advisor
   - the plugin, so teammates get it too
-- **Labels**: `ready-for-agent`, `in-progress`, `needs-triage`, `needs-info`, `blocked`, `deferred`, `ready-for-human`, `type:`, `area:` and `P1` to `P3`.
-- **Issue templates** with *Acceptance criteria*, *Where in the code*, *Out of scope* and *Verify*.
+- **Labels**: `ready-for-agent`, `in-progress`, `needs-triage`, `needs-info`, `blocked`, `deferred`, `ready-for-human`, `type:`, `area:` and `P1` to `P3`, plus `verify-after-deploy` when that setting is on.
+- **Issue templates** with *Acceptance criteria*, *Where in the code*, *Out of scope* and *Verify*, plus *Verify after deploy* when that setting is on.
 - **`CLAUDE.md`**: the pipeline's rules. If the file is over about 200 lines, `adopt` offers to split it into path-scoped `.claude/rules/`.
 - **CI**: suggested `paths-ignore` lines, so a change to agent config does not deploy.
 
 It opens a PR and leaves the merge to you.
+
+## Workflow settings
+
+Three settings in `.claude/agent-pipeline.md` change how a developer works. Leave one out and it takes its default, which is how the pipeline behaved before the setting existed.
+
+| Setting | Default | Alternative |
+|---|---|---|
+| **Test cadence** | `inner-loop`: build and fast tests while implementing, slow tests once at the end | `end-only`: nothing runs while implementing. The build, fast tests and slow tests run once each, in full, before the PR. A failure reruns only the failing tests, then the full set once more |
+| **Visual QA** | `required`: each touched screen in every theme, at phone, tablet and desktop widths, recorded in the PR | `none`: no rendered checks, for a project with no UI or one that does not gate on them |
+| **Verify after deploy** | `off`: every issue closes when its PR merges | `on`: an issue whose *Verify after deploy* section is filled in gets `Refs #<n>`, not `Fixes #<n>`. On merge the reviewer labels it `verify-after-deploy`, and it stays open |
+
+A `verify-after-deploy` issue waits for someone, or a project skill, to run its check against the deployed app. If the check passes, close the issue with the evidence as a comment. If it fails, comment what it showed and swap the label for `needs-triage`. The dispatcher lists these issues at the end of each pass and never starts them.
 
 ## A request, end to end
 
@@ -150,7 +162,8 @@ skills/           plan, dispatch, ship-issue, adopt
 agents/           pr-reviewer.md
 hooks/            hooks.json, guard-commit.mjs
 scripts/          merge-settings.mjs, split-claude-md.mjs
-templates/        agent-pipeline.md, settings.json, labels.json, claude-md-section.md, ISSUE_TEMPLATE/
+templates/        agent-pipeline.md, settings.json, labels.json, claude-md-section.md, ISSUE_TEMPLATE/,
+                  verify-after-deploy-field.yml
 ```
 
 **To change the workflow for everyone, edit the skills here.** Project-specific detail belongs in each project's `.claude/agent-pipeline.md`.

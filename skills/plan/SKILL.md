@@ -34,7 +34,8 @@ Slice **vertically**: each issue delivers something observable, end to end, and 
 - [ ] its **acceptance criteria** are checkable statements, not intentions
 - [ ] **Where in the code** names the files and entry points; the developer reads those and nothing else
 - [ ] **Out of scope** says what it deliberately does not do
-- [ ] **Verify** names the tests that prove it, and the screens and widths to check for UI work
+- [ ] **Verify** names the tests that prove it and, when the settings' *Visual QA* is `required`, the screens and widths to check for UI work
+- [ ] when the settings turn *Verify after deploy* `on`: that section holds one exact check and what it must show, only for what nothing but the deployed app can prove, and is blank otherwise
 - [ ] no design question is left open: the developer chooses only between equivalent implementations
 - [ ] it has a type label, an area label and a priority (`P1` to `P3`)
 - [ ] anything it depends on is a separate issue, linked as a blocker

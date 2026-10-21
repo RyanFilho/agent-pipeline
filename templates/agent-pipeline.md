@@ -17,13 +17,21 @@ Read by `/agent-pipeline:dispatch`, `/agent-pipeline:ship-issue` and the `agent-
 | Fast tests, the inner loop | `<fast test command>` |
 | Slow tests, run once at the end | `<full or browser test command, or "none">` |
 
+## Workflow
+
+A setting left out of this file takes its default, which is how the pipeline behaved before the setting existed.
+
+- **Test cadence:** `inner-loop` <!-- default: build and fast tests while implementing, slow tests once at the end. Or end-only: nothing while implementing, then every command above once, in full, before the PR -->
+- **Visual QA:** `required` <!-- default: check each touched screen in every theme and at phone, tablet and desktop widths. Or none: the project has no UI, or does not gate on rendered checks -->
+- **Verify after deploy:** `off` <!-- default: every issue closes when its PR merges. Or on: an issue whose "Verify after deploy" section is filled in stays open after the merge, labelled verify-after-deploy, until that check passes against the deployed app -->
+
 ## Labels
 
 | Role | Labels |
 |---|---|
 | Ready for an agent | `ready-for-agent` |
 | Claim lock | `in-progress` |
-| Not available | `blocked`, `deferred`, `needs-triage`, `needs-info`, `ready-for-human` |
+| Not available | `blocked`, `deferred`, `needs-triage`, `needs-info`, `ready-for-human`, `verify-after-deploy` |
 | Type → branch prefix | `type: feature` → `feat`, `type: bug` → `fix`, `type: chore` → `chore`, `type: docs` → `docs` |
 | Never two in flight at once | `area: db` <!-- areas whose work collides, e.g. migrations --> |
 | Review with Opus | `P1`, `area: auth`, `area: db` |
