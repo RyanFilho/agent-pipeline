@@ -69,7 +69,7 @@ Without a session tool (in a plain terminal), tell the user which issues are cla
 
 **6. When the reviewer answers:**
 
-- `MERGED`: remove the claim lock; the issue closes through `Fixes #<n>`. When the line ends `verify after deploy`, the PR said `Refs #<n>` instead: the issue stays open with the `verify-after-deploy` label, and you do nothing more with it. File each of the developer's *Follow-ups* as a `needs-triage` issue, and offer to archive the developer session.
+- `MERGED`: remove the claim lock; the issue closes through `Fixes #<n>`. When the line ends `verify after deploy`, the PR said `Refs #<n>` instead: the issue stays open with the `verify-after-deploy` label, and you do nothing more with it. File each of the developer's *Follow-ups* as an issue whose body is the follow-up plus `From PR #<m> for #<n>`. Label it `needs-triage`, plus one label from each group the settings list under *Every issue carries*, chosen from the follow-up's text; triage corrects a wrong guess. Then offer to archive the developer session.
 - `CHANGES`, `CI-RED` or `CONFLICT`: send the developer session one line, `Review on PR #<m>: address it, push, and report again.` The detail is on the PR. If the same PR gets `CHANGES` a second time, take it to the user instead.
 
 **7. Repeat** from step 1 until nothing is left to start and nothing is in flight.

@@ -29,17 +29,20 @@ Then read the `.claude/rules/*.md` files whose `paths:` match the changed files,
 - no local config (`.claude/settings.local.json`, `.claude/worktrees/`) or unrelated files
 - real bugs: a wrong branch, a missed null, an off-by-one, an error answered as success
 
-Report only what should block the merge or is a real bug. Skip style preferences. For a high-risk issue (one the settings list under *Review with Opus*), also list every schema or data operation in your comment.
+Report only what should block the merge or is a real bug. Skip style preferences.
+
+**Whenever the diff changes the schema or stored data** (a migration, a seed, a data script), whatever the issue's labels, list every operation it performs, one line each, marked additive or not. A destructive operation the issue did not ask for blocks.
 
 ## 3. Decide
 
-- **Blocking findings**: post them as one PR comment (`gh pr comment <m> --body-file -`), each as `path:line`, what is wrong, and why. Use a comment rather than a review, because GitHub does not let an author request changes on their own PR and pipeline sessions usually sign in as that author.
+- **Blocking findings**: post them as one PR comment (`gh pr comment <m> --body-file -`), each as `path:line`, what is wrong, and why, followed by the operations list if there is one. Use a comment rather than a review, because GitHub does not let an author request changes on their own PR and pipeline sessions usually sign in as that author.
 - **Behind or conflicting** (`mergeStateStatus` is `BEHIND` or `DIRTY`): do not merge. The developer merges the default branch in.
 - **Clean**: run `gh pr checks <m> --watch --fail-fast`. When every check is green:
-  1. Merge with `gh pr merge <m> <merge method>`.
-  2. Confirm `gh pr view <m> --json state` reads `MERGED`.
-  3. Delete the remote branch with `git push origin --delete <head>`.
-  4. If the PR opens with `Refs #<n>`, mark the issue as waiting on the deployed app, so no one picks it up again: `gh issue edit <n> --add-label verify-after-deploy --remove-label ready-for-agent`. Leave it open.
+  1. If there is an operations list, post it as a PR comment first, so the record outlives the merge.
+  2. Merge with `gh pr merge <m> <merge method>`.
+  3. Confirm `gh pr view <m> --json state` reads `MERGED`.
+  4. Delete the remote branch with `git push origin --delete <head>`.
+  5. If the PR opens with `Refs #<n>`, mark the issue as waiting on the deployed app, so no one picks it up again: `gh issue edit <n> --add-label verify-after-deploy --remove-label ready-for-agent`. Leave it open.
 
   Do not pass `--delete-branch`: it also deletes the local branch, which fails while the developer's worktree has it checked out.
 

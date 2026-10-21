@@ -32,6 +32,7 @@ A setting left out of this file takes its default, which is how the pipeline beh
 | Ready for an agent | `ready-for-agent` |
 | Claim lock | `in-progress` |
 | Not available | `blocked`, `deferred`, `needs-triage`, `needs-info`, `ready-for-human`, `verify-after-deploy` |
+| Every issue carries | one `type:`, one `area:`, and one of `P1` to `P3` <!-- the label groups every issue needs, follow-ups included, or "none" --> |
 | Type → branch prefix | `type: feature` → `feat`, `type: bug` → `fix`, `type: chore` → `chore`, `type: docs` → `docs` |
 | Never two in flight at once | `area: db` <!-- areas whose work collides, e.g. migrations --> |
 | Review with Opus | `P1`, `area: auth`, `area: db` |
