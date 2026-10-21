@@ -56,6 +56,7 @@ Issues filed from the templates are `ready-for-agent` straight away: no one has 
 | `/agent-pipeline:dispatch` | **Lead**: claims issues, starts developers, routes verdicts | a one-line prompt |
 | `/agent-pipeline:ship-issue <n>` | **Developer**: builds one issue in a worktree, opens the PR | a PR body with evidence, and a four-line report |
 | `agent-pipeline:pr-reviewer` | **Reviewer**: checks the spec and the standards, then merges | a one-line verdict |
+| `/agent-pipeline:verify [n…]` | **Verifier**: after a deploy, runs each waiting *Verify after deploy* check against the live app | a closed issue with evidence, or one handed back as `needs-info` |
 | `/agent-pipeline:adopt` | **Setup**: prepares a repository | a PR |
 | commit guard hook | refuses commits of local Claude config, and commits that introduce broken encoding | an error message Claude can act on |
 
@@ -63,7 +64,7 @@ Issues filed from the templates are `ready-for-agent` straight away: no one has 
 
 It inspects the repository, shows what it found, and asks once for anything it had to guess. Then, on a branch:
 
-- **`.claude/agent-pipeline.md`**: the repository, merge method, build and test commands, the [workflow settings](#workflow-settings), labels (including the ones every issue must carry, which filed follow-ups get too), areas that must not run in parallel, and the project's gates. Every pipeline session reads it.
+- **`.claude/agent-pipeline.md`**: the repository, merge method, build and test commands, the [workflow settings](#workflow-settings) (with the deployed app and how to read its live commit, when *Verify after deploy* is on), labels (including the ones every issue must carry, which filed follow-ups get too), areas that must not run in parallel, and the project's gates. Every pipeline session reads it.
 - **`.claude/settings.json`**:
   - permission allow and deny lists, so the pipeline runs without prompts but can never push to the default branch or force push
   - the advisor
@@ -86,7 +87,23 @@ Four settings in `.claude/agent-pipeline.md` change how a developer and the revi
 | **Verify after deploy** | `off`: every issue closes when its PR merges | `on`: an issue whose *Verify after deploy* section is filled in gets `Refs #<n>`, not `Fixes #<n>`. On merge the reviewer labels it `verify-after-deploy`, and it stays open |
 | **No CI checks** | `blocked`: a PR on which no CI check runs is not merged | `green`: for CI filtered by path, where a docs or agent-config PR gets no checks at all. Such a PR counts as green |
 
-A `verify-after-deploy` issue waits for someone, or a project skill, to run its check against the deployed app. If the check passes, close the issue with the evidence as a comment. If it fails, comment what it showed and swap the label for `needs-info`. The dispatcher lists these issues at the end of each pass and never starts them.
+With *Verify after deploy* `on`, two more lines tell `/agent-pipeline:verify` where to look:
+
+| Setting | Example | Meaning |
+|---|---|---|
+| **Deployed app** | `https://app.example.com` | the base URL the checks run against |
+| **Deployed version** | `workflow deploy.yml`, or `command curl -s https://app.example.com/version` | how to tell which commit is live: the latest successful run of that workflow on the default branch, or a read-only command that prints the live commit SHA |
+
+### Running the checks
+
+The dispatcher never starts a `verify-after-deploy` issue. It lists them at the end of each pass and offers `/agent-pipeline:verify`, which you can also run by hand after a deploy, or on a schedule. For each open `verify-after-deploy` issue (or only the numbers you pass), it:
+
+1. finds the merged PR that opens with `Refs #<n>`, and checks that its merge commit is in the live commit. If not, the issue keeps waiting, untouched.
+2. runs the exact check in the issue's *Verify after deploy* section against the deployed app. It only reads: a check that would write data or change a setting, or that needs a secret the session lacks, is skipped and left for a person.
+3. **passes**: closes the issue with the evidence (the check, what it showed, the live commit and the time).
+4. **fails**: comments what the check showed against what it had to show, and swaps `verify-after-deploy` for `needs-info`. You decide on a fix with `/agent-pipeline:plan <n>`. The PR is not reverted.
+
+It answers with one line per issue: `PASS`, `FAIL`, `WAITING` or `SKIPPED`.
 
 ## A request, end to end
 
@@ -163,7 +180,7 @@ sequenceDiagram
 
 ```text
 .claude-plugin/   plugin.json, marketplace.json
-skills/           plan, dispatch, ship-issue, adopt
+skills/           plan, dispatch, ship-issue, verify, adopt
 agents/           pr-reviewer.md
 hooks/            hooks.json, guard-commit.mjs
 scripts/          merge-settings.mjs, split-claude-md.mjs

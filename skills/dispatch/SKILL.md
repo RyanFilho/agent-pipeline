@@ -91,4 +91,4 @@ Ask only for product or design decisions, and batch them into one message. End e
 | Issue | PR | State | Follow-ups |
 |---|---|---|---|
 
-When the settings turn *Verify after deploy* `on`, list under the table the open issues labelled `verify-after-deploy` (`gh issue list --label verify-after-deploy --state open --json number,title`). They are merged and wait on a check against the deployed app, which the user or a project skill runs, not the pipeline.
+When the settings turn *Verify after deploy* `on`, list under the table the open issues labelled `verify-after-deploy` (`gh issue list --label verify-after-deploy --state open --json number,title`). They are merged and wait on a check against the deployed app. Never start them, and never run their checks in this session. If any are listed, end the pass by offering `/agent-pipeline:verify`, which runs the checks whose merge is deployed and leaves the rest waiting.

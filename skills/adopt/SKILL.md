@@ -46,6 +46,7 @@ Find out each of these, and note where the answer came from:
 | Verify after deploy | criteria or docs that only the deployed app can settle: a live endpoint, a production setting, seeded data. If issues often wait on such a check, suggest `on`; otherwise keep the default, `off` |
 | No CI checks | `paths:` or `paths-ignore:` on the workflows that run on pull requests. If some PRs (docs, `.claude/`) get no checks at all, suggest `green`; otherwise keep the default, `blocked` |
 | Open issues | `gh issue list --state open --limit 200 --json number,title,labels`. Agents take only issues labelled `ready-for-agent`, so existing ones wait until the user runs `/agent-pipeline:plan <n>` on them |
+| Deployed app, deployed version | only when *Verify after deploy* is `on`: the production URL in the README, the deploy workflow or its environment. For the version, prefer `workflow <file>` naming the workflow that deploys on push to the default branch; use `command <cmd>` when the app serves its commit SHA, for example at a `/version` route |
 
 ## 2. Show the findings, and ask once
 
@@ -104,5 +105,6 @@ Tell the user, in a few lines:
 - merge the PR, then work from an up-to-date checkout of the default branch
 - `/agent-pipeline:plan <idea>` in a session at the strongest model and high effort, to file `ready-for-agent` issues, or `/agent-pipeline:plan <n> <n>` to make existing issues ready
 - `/agent-pipeline:dispatch` in a session at medium effort, in the permission mode the developers should use
+- when *Verify after deploy* is `on`: `/agent-pipeline:verify` after each deploy, by hand or as a scheduled task, to close the issues waiting on one
 
 Once the PR is merged, remove the worktree: `ExitWorktree` with remove, or `git worktree remove <path>` if you used `git worktree add`. Removal can fail and leave the folder behind with a stale `.git` file while git no longer lists the worktree. If it does, tell the user and, with their go-ahead, delete that folder, then run `git worktree prune` and `git branch -D chore/adopt-agent-pipeline`.
