@@ -1,0 +1,11 @@
+{
+  "name": "agent-pipeline",
+  "displayName": "Agent Pipeline",
+  "description": "Run feature work as planner, dispatcher, developer and reviewer Claude Code sessions, with GitHub Issues as the message bus.",
+  "author": {
+    "name": "RyanFilho",
+    "url": "https://github.com/RyanFilho"
+  },
+  "repository": "https://github.com/RyanFilho/agent-pipeline",
+  "keywords": ["workflow", "github-issues", "multi-agent", "pull-requests", "worktrees", "code-review"]
+}

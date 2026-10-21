@@ -1,0 +1,49 @@
+name: Bug
+description: Something is broken or behaves incorrectly
+labels: ["type: bug", "needs-triage"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What is wrong
+      description: One or two sentences on what actually happens.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: Concrete steps, or the exact request or state that triggers it.
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: where
+    attributes:
+      label: Where in the code
+      description: Files or entry points you already suspect. An agent reads these and nothing else, so name them.
+
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: Related problems this fix should leave alone.
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Checkable statements, starting with the test that fails today and passes once this is fixed.
+      value: |
+        - [ ]

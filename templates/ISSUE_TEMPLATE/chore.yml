@@ -1,0 +1,46 @@
+name: Chore
+description: Maintenance, refactoring, tooling, dependencies or documentation
+labels: ["type: chore", "needs-triage"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What needs doing
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it is worth doing
+      description: The cost of leaving it alone. If there is none, do not file it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+
+  - type: textarea
+    id: where
+    attributes:
+      label: Where in the code
+      description: Files and entry points this will touch. An agent reads these and nothing else, so name them.
+
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: What this deliberately does not do, so an agent does not drift into it.
+
+  - type: textarea
+    id: verify
+    attributes:
+      label: Verify
+      description: Which tests prove it, and which slow tests to run once at the end.

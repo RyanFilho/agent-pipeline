@@ -1,0 +1,54 @@
+name: Feature
+description: A new capability or an improvement to an existing one
+labels: ["type: feature", "needs-triage"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should be possible after this ships, and for whom.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: The problem this solves. Skip if it is obvious from the goal.
+
+  - type: input
+    id: spec
+    attributes:
+      label: Spec
+      description: For anything larger than a couple of files, link the design and any ADR that constrains it. Leave blank for small, self-contained work.
+      placeholder: docs/specs/<feature>.md
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Checkable statements. This is what closes the issue.
+      value: |
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+
+  - type: textarea
+    id: where
+    attributes:
+      label: Where in the code
+      description: Files and entry points this will touch. An agent reads these and nothing else, so name them.
+
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: What this deliberately does not do, so an agent does not drift into it.
+
+  - type: textarea
+    id: verify
+    attributes:
+      label: Verify
+      description: Which tests prove it, and which slow tests to run once at the end. For UI, the screens to check, in which themes and at which widths.
+      placeholder: Unit tests for <module>. End-to-end: <spec>. UI: <route> at 375, 768 and 1280, light and dark.

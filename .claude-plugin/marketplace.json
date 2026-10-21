@@ -1,0 +1,14 @@
+{
+  "name": "agent-pipeline",
+  "description": "A planner, dispatcher, developer and reviewer workflow for Claude Code over GitHub Issues.",
+  "owner": {
+    "name": "RyanFilho"
+  },
+  "plugins": [
+    {
+      "name": "agent-pipeline",
+      "source": "./",
+      "description": "Plan tickets, dispatch one fresh agent per ticket in its own worktree, review and merge on green CI."
+    }
+  ]
+}

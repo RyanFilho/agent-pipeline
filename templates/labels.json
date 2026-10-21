@@ -1,0 +1,16 @@
+[
+  { "name": "ready-for-agent", "color": "0E8A16", "description": "Fully specified: an agent can ship it from the body alone" },
+  { "name": "in-progress", "color": "FBCA04", "description": "Claimed by a pipeline session; do not start it" },
+  { "name": "needs-triage", "color": "D4C5F9", "description": "Not yet checked against the definition of ready" },
+  { "name": "needs-info", "color": "D876E3", "description": "Waiting on an answer from a person" },
+  { "name": "blocked", "color": "B60205", "description": "Waiting on another issue or an outside change" },
+  { "name": "deferred", "color": "C5DEF5", "description": "Agreed, but not now" },
+  { "name": "ready-for-human", "color": "1D76DB", "description": "Needs a person: a judgement, access or a decision an agent cannot make" },
+  { "name": "type: feature", "color": "A2EEEF", "description": "A new capability or an improvement" },
+  { "name": "type: bug", "color": "D73A4A", "description": "Something is broken" },
+  { "name": "type: chore", "color": "EDEDED", "description": "Maintenance, refactoring, tooling or dependencies" },
+  { "name": "type: docs", "color": "0075CA", "description": "Documentation only" },
+  { "name": "P1", "color": "B60205", "description": "Do next" },
+  { "name": "P2", "color": "FBCA04", "description": "Soon" },
+  { "name": "P3", "color": "0E8A16", "description": "When there is room" }
+]
