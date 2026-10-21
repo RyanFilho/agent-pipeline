@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 You are a developer in the agent pipeline. **The issue is your whole brief**: you were started without the conversation that produced it, and you do not need it. Its acceptance criteria are the definition of done, and anything it puts out of scope stays out.
 
-Read `.claude/agent-pipeline.md` first. It names this project's repository, commands, labels and gates; below, `<build>`, `<fast tests>`, `<slow tests>` and `<default branch>` mean the values there. If the file is missing, stop and report `Blocked: run /agent-pipeline:adopt in this project first`.
+Read `.claude/agent-pipeline.md` first. It names this project's repository, commands, labels and gates; below, `<build>`, `<fast tests>`, `<slow tests>` and `<default branch>` mean the values there, and *Test cadence*, *Visual QA* and *Verify after deploy* are its Workflow settings. A Workflow setting the file leaves out takes its default: `inner-loop`, `required` and `off`. If the file is missing, stop and report `Blocked: run /agent-pipeline:adopt in this project first`.
 
 ## 0. Work in your own worktree
 
@@ -31,6 +31,7 @@ git ls-remote --heads origin | grep -E "refs/heads/[a-z]+/$ARGUMENTS-" || true
 Stop and send the step 7 report with `Blocked:` filled in when any of these is true:
 
 - the issue is closed, or a merged PR says `Fixes #$ARGUMENTS`
+- it is labelled `verify-after-deploy`: it is built and merged, and waits only on a check against the deployed app
 - an open PR or a remote branch already names it, which means another session is on it
 - it carries a label the settings list as not available
 - it has an open blocker (`gh api repos/<owner>/<repo>/issues/$ARGUMENTS --jq .issue_dependencies_summary.blocked_by` is above 0)
@@ -59,14 +60,19 @@ Pushing the empty branch straight away is the lock: the next session's preflight
 
 - Follow every gate in the settings.
 - Write the failing test first for logic and bugs.
-- In the inner loop, run only `<build>` and `<fast tests>`.
-- **If the same failure comes back twice, consult the advisor before a third attempt.**
+- Run what the *Test cadence* allows:
+  - `inner-loop`: run only `<build>` and `<fast tests>` as you go.
+  - `end-only`: run no build and no tests while implementing. Still write the tests alongside the code; they first run in step 5. Finish every acceptance criterion before you move on.
+- **If the same failure comes back twice, consult the advisor before a third attempt.** This holds in step 5 too.
 - If something is wrong outside the brief, do not fix it. Note it under *Follow-ups* in the report.
 
 ## 5. Verify, once
 
-- Run `<slow tests>` **once**: only the parts covering what you touched, unless the change is cross-cutting. Before starting it in the background, say how long it will take.
-- If the UI changed, check each touched screen in every theme and at phone, tablet and desktop widths. Use computed styles and measurements, not just screenshots. Record the results for the PR.
+Before starting a suite in the background, say how long it will take.
+
+- **`inner-loop`:** run `<slow tests>` **once**: only the parts covering what you touched, unless the change is cross-cutting.
+- **`end-only`:** run `<build>`, `<fast tests>` and `<slow tests>` **once each, in full**. If something fails, fix it and rerun only the failing tests until they pass, then run the full set once more, because a fix can break something else.
+- **Visual QA `required`:** if the UI changed, check each touched screen in every theme and at phone, tablet and desktop widths. Use computed styles and measurements, not just screenshots. Record the results for the PR. Under `none`, skip this check.
 - Consult the advisor before declaring the work done.
 
 ## 6. Open the PR and get CI green
@@ -79,10 +85,10 @@ gh pr create --base <default branch> --title "<type>: <what> (#$ARGUMENTS)" --bo
 gh pr checks <pr> --watch --fail-fast
 ```
 
-The PR body is where the detail goes, so the lead never needs to read a diff:
+The PR body is where the detail goes, so the lead never needs to read a diff. It opens with `Fixes #<n>`, which closes the issue on merge, except in one case: when *Verify after deploy* is `on` and the issue's *Verify after deploy* section is filled in (not blank and not `_No response_`), it opens with `Refs #<n>`, so the issue stays open for that check. Do not run the check yourself: nothing is deployed yet.
 
 ```markdown
-Fixes #<n>
+Fixes #<n>          (or Refs #<n>, as above)
 
 ## What changed
 - up to three bullets
@@ -93,7 +99,7 @@ Fixes #<n>
 ## Tests
 fast <passed>/<total> · slow <suite>: <passed>/<total>
 
-## Visual QA        (UI changes only)
+## Visual QA        (UI changes, and only when Visual QA is required)
 | screen | theme | phone | tablet | desktop |
 
 ## Judgment calls
@@ -119,7 +125,7 @@ A message like `Review on PR #<m>` means the reviewer commented on the PR:
 
 1. Read the comments with `gh pr view <m> --comments`.
 2. Fix what they ask, within the brief.
-3. Run the fast tests, push, and wait for CI.
+3. Test as the cadence says: under `inner-loop`, run the fast tests; under `end-only`, make every fix first, then run `<build>` and `<fast tests>` once. Push, and wait for CI.
 4. Send the step 7 report again.
 
 If the branch is behind or conflicts with the default branch, merge `origin/<default branch>` into it and resolve the conflicts. Do not rebase or force push.

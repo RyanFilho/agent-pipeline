@@ -6,6 +6,7 @@
   { "name": "blocked", "color": "B60205", "description": "Waiting on another issue or an outside change" },
   { "name": "deferred", "color": "C5DEF5", "description": "Agreed, but not now" },
   { "name": "ready-for-human", "color": "1D76DB", "description": "Needs a person: a judgement, access or a decision an agent cannot make" },
+  { "name": "verify-after-deploy", "color": "5319E7", "description": "Merged; stays open until its check passes against the deployed app" },
   { "name": "type: feature", "color": "A2EEEF", "description": "A new capability or an improvement" },
   { "name": "type: bug", "color": "D73A4A", "description": "Something is broken" },
   { "name": "type: chore", "color": "EDEDED", "description": "Maintenance, refactoring, tooling or dependencies" },

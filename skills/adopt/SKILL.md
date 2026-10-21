@@ -37,10 +37,13 @@ Find out each of these, and note where the answer came from:
 | Instructions | `CLAUDE.md` (line count), `.claude/rules/`, `.claude/settings.json`, any existing commit hook |
 | Domain docs | a glossary (`CONTEXT.md`, `GLOSSARY.md`), ADRs (`docs/adr/`), specs (`docs/specs/`) |
 | CI filters | `paths-ignore` or path filters on the PR and deploy workflows |
+| Test cadence | `CLAUDE.md` or contributing docs that say when tests run. Suites that are slow or costly to run argue for `end-only`; otherwise keep the default, `inner-loop` |
+| Visual QA | whether the project has a UI, and whether its docs gate on rendered or browser checks. No UI, or docs that rule those checks out, means `none`; otherwise keep the default, `required` |
+| Verify after deploy | criteria or docs that only the deployed app can settle: a live endpoint, a production setting, seeded data. If issues often wait on such a check, suggest `on`; otherwise keep the default, `off` |
 
 ## 2. Show the findings, and ask once
 
-Show one table of what you will write into `.claude/agent-pipeline.md`, and mark each value *found* or *guessed*. Then ask, in one batch, for everything guessed: the commands, the merge method, the areas to serialise, the labels that get an Opus review, and the project's **gates**, meaning rules every PR must meet that the reviewer will check. Offer gates you saw in the docs as suggestions.
+Show one table of what you will write into `.claude/agent-pipeline.md`, and mark each value *found* or *guessed*. Then ask, in one batch, for everything guessed: the commands, the merge method, the areas to serialise, the labels that get an Opus review, any Workflow setting you would move off its default, and the project's **gates**, meaning rules every PR must meet that the reviewer will check. Offer gates you saw in the docs as suggestions.
 
 Also list what step 3 will change, so the user can strike items: labels to create, templates to add, the CLAUDE.md split, and CI filters.
 
@@ -48,7 +51,7 @@ Also list what step 3 will change, so the user can strike items: labels to creat
 
 Work in a worktree, so the user's checkout is untouched: call `EnterWorktree` with the name `adopt-agent-pipeline`. If it is unavailable, use `git worktree add` from `origin/<default>` with `--no-track`. Then `git switch -c chore/adopt-agent-pipeline origin/<default> --no-track`.
 
-1. **Settings file.** Copy `${CLAUDE_PLUGIN_ROOT}/templates/agent-pipeline.md` to `.claude/agent-pipeline.md` and fill it in from step 2. Delete the HTML comments, and keep it short: every pipeline session reads it.
+1. **Settings file.** Copy `${CLAUDE_PLUGIN_ROOT}/templates/agent-pipeline.md` to `.claude/agent-pipeline.md` and fill it in from step 2. Delete the HTML comments, and keep it short: every pipeline session reads it. On an update, add a missing Workflow section with the defaults, unless step 2 agreed otherwise.
 2. **Permissions.** Merge the template into `.claude/settings.json`. Use a command prefix that stays the same across runs (`npm run build`, `dotnet test`); pass an empty value when there is none, and that entry is dropped:
 
    ```bash
@@ -56,8 +59,10 @@ Work in a worktree, so the user's checkout is untouched: call `EnterWorktree` wi
    ```
 
    Show the dry run, then run it again without `--dry-run`. Existing entries are kept, and `advisorModel` is added only if absent. The merge also registers this plugin's marketplace and enables the plugin in the project, so a teammate who clones the repository and trusts the folder gets the plugin too. If the plugin was installed from a fork, change `extraKnownMarketplaces` to point at that fork.
-3. **Labels.** Once the user agrees, create each missing label: `gh label create "<name>" --color <hex> --description "<text>"`. Create the `area:` labels agreed in step 2. Do not rename or delete existing labels; record a mapping in the settings file instead.
-4. **Issue templates.** If `.github/ISSUE_TEMPLATE/` is empty or missing, copy `${CLAUDE_PLUGIN_ROOT}/templates/ISSUE_TEMPLATE/*.yml`. If templates exist, add only the missing sections (*Acceptance criteria*, *Where in the code*, *Out of scope*, *Verify*) and keep the rest.
+3. **Labels.** Once the user agrees, create each missing label: `gh label create "<name>" --color <hex> --description "<text>"`. Create the `area:` labels agreed in step 2. Skip `verify-after-deploy` unless that setting is `on`. Do not rename or delete existing labels; record a mapping in the settings file instead.
+4. **Issue templates.** If `.github/ISSUE_TEMPLATE/` is empty or missing, copy `${CLAUDE_PLUGIN_ROOT}/templates/ISSUE_TEMPLATE/*.yml`. If templates exist, add only the missing sections (*Acceptance criteria*, *Where in the code*, *Out of scope*, *Verify*) and keep the rest. Then apply the Workflow settings:
+   - *Verify after deploy* `on`: append `${CLAUDE_PLUGIN_ROOT}/templates/verify-after-deploy-field.yml`, without its comment, to the end of each template's `body:`.
+   - *Visual QA* `none`: drop the screens, themes and widths from the *Verify* field's description and placeholder.
 5. **CLAUDE.md.** If there is none, suggest `/init` first, or create one with just the section below. If it is over about 200 lines, offer to split it, and proceed only if the user agrees:
    - Group its sections by the files they are about.
    - Write a plan file in your scratchpad (the format is in the header of `${CLAUDE_PLUGIN_ROOT}/scripts/split-claude-md.mjs`). It moves each subsystem's detail into a rule with matching `paths:`, and keeps what every session needs: how to run, build and test, the architecture in brief, conventions, and a table of the rules.
