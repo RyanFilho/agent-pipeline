@@ -63,7 +63,7 @@ To triage existing issues instead of planning new ones, run `/agent-pipeline:pla
 
 It inspects the repository, shows what it found, and asks once for anything it had to guess. Then, on a branch:
 
-- **`.claude/agent-pipeline.md`**: the repository, merge method, build and test commands, the [workflow settings](#workflow-settings), labels, areas that must not run in parallel, and the project's gates. Every pipeline session reads it.
+- **`.claude/agent-pipeline.md`**: the repository, merge method, build and test commands, the [workflow settings](#workflow-settings), labels (including the ones every issue must carry, which filed follow-ups get too), areas that must not run in parallel, and the project's gates. Every pipeline session reads it.
 - **`.claude/settings.json`**:
   - permission allow and deny lists, so the pipeline runs without prompts but can never push to the default branch or force push
   - the advisor
@@ -134,6 +134,7 @@ sequenceDiagram
 - 🚦 **Permissions.** Routine commands are allowed. Pushing to the default branch, force pushing and `--admin` merges are denied.
 - ✅ **Merges.** Only on green CI, with the method the repository already uses.
 - 🧵 **Serialised areas.** Two issues in an area such as migrations never run at once.
+- 🗄️ **Schema changes.** Any PR that changes the schema or stored data gets every operation listed on the PR, marked additive or not, before it merges.
 
 ## Requirements
 

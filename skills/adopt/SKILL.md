@@ -33,6 +33,7 @@ Find out each of these, and note where the answer came from:
 | Areas | the top-level layout and any existing `area:` labels; propose a few (`db`, `api`, `ui`, `infra`, …) |
 | Areas that must not run in parallel | migrations, a lockfile, generated code: anything two branches cannot both change and merge cleanly |
 | Existing labels | `gh label list --limit 200 --json name,description`, compared with `${CLAUDE_PLUGIN_ROOT}/templates/labels.json`. A label with another name but the same role (`agent-ready`, `wip`) is a mapping, not a missing label |
+| Labels every issue must carry | the docs, and the `labels:` in existing issue templates. Without a rule there, propose the pipeline's own: one `type:`, one `area:` and one priority |
 | Issue templates | `.github/ISSUE_TEMPLATE/` |
 | Instructions | `CLAUDE.md` (line count), `.claude/rules/`, `.claude/settings.json`, any existing commit hook |
 | Domain docs | a glossary (`CONTEXT.md`, `GLOSSARY.md`), ADRs (`docs/adr/`), specs (`docs/specs/`) |
