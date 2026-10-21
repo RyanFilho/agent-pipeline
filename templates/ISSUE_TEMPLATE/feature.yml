@@ -1,6 +1,6 @@
 name: Feature
 description: A new capability or an improvement to an existing one
-labels: ["type: feature", "needs-triage"]
+labels: ["type: feature", "ready-for-agent"]
 body:
   - type: textarea
     id: goal
