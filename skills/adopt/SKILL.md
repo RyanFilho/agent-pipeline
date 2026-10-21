@@ -46,7 +46,7 @@ Find out each of these, and note where the answer came from:
 | Verify after deploy | criteria or docs that only the deployed app can settle: a live endpoint, a production setting, seeded data. If issues often wait on such a check, suggest `on`; otherwise keep the default, `off` |
 | No CI checks | `paths:` or `paths-ignore:` on the workflows that run on pull requests. If some PRs (docs, `.claude/`) get no checks at all, suggest `green`; otherwise keep the default, `blocked` |
 | Open issues | `gh issue list --state open --limit 200 --json number,title,labels`. Agents take only issues labelled `ready-for-agent`, so existing ones wait until the user runs `/agent-pipeline:plan <n>` on them |
-| Deployed app, deployed version | only when *Verify after deploy* is `on`: the production URL in the README, the deploy workflow or its environment. For the version, prefer `workflow <file>` naming the workflow that deploys on push to the default branch; use `command <cmd>` when the app serves its commit SHA, for example at a `/version` route |
+| Deployed app, deployed version | only when *Verify after deploy* is `on`: the production URL in the README, the deploy workflow or its environment. For the version, list every workflow that deploys on push to the default branch: `workflow <file>`, or `workflow <file>, <file>` when there are several. When there is more than one, or one filters by `paths:` or `paths-ignore:`, say that verify waits only on the workflows a merge's files touch. Then offer the other form too: `command <cmd>` reading a `/version` route that serves the build's commit SHA, which the project would add if it lacks one. If the app already serves its SHA, suggest `command` |
 
 ## 2. Show the findings, and ask once
 

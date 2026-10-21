@@ -38,6 +38,7 @@
       "Bash(git ls-remote *)",
       "Bash(git merge-base *)",
       "Bash(git cat-file *)",
+      "Bash(git show origin/*:.github/workflows/*)",
       "Bash(git switch -c * origin/<DEFAULT_BRANCH> --no-track)",
       "Bash(git add *)",
       "Bash(git commit *)",

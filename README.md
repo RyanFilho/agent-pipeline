@@ -92,13 +92,13 @@ With *Verify after deploy* `on`, two more lines tell `/agent-pipeline:verify` wh
 | Setting | Example | Meaning |
 |---|---|---|
 | **Deployed app** | `https://app.example.com` | the base URL the checks run against |
-| **Deployed version** | `workflow deploy.yml`, or `command curl -s https://app.example.com/version` | how to tell which commit is live: the latest successful run of that workflow on the default branch, or a read-only command that prints the live commit SHA |
+| **Deployed version** | `workflow deploy.yml`, `workflow backend.yml, frontend.yml`, or `command curl -s https://app.example.com/version` | how to tell which commit is live. `workflow` lists every deploy workflow; each is live at its latest successful run on the default branch. `command` is a read-only command that prints the live commit SHA, such as a `/version` route that serves the build's SHA |
 
 ### Running the checks
 
 The dispatcher never starts a `verify-after-deploy` issue. It lists them at the end of each pass and offers `/agent-pipeline:verify`, which you can also run by hand after a deploy, or on a schedule. For each open `verify-after-deploy` issue (or only the numbers you pass), it:
 
-1. finds the merged PR that opens with `Refs #<n>`, and checks that its merge commit is in the live commit. If not, the issue keeps waiting, untouched.
+1. finds the merged PR that opens with `Refs #<n>`, and checks that its merge commit is live. With several deploy workflows, it reads each one's `paths:` or `paths-ignore:` from the workflow file and waits only on the ones the PR's files touched. A workflow without a filter is always touched. A merge that touched none, such as a docs-only change, is checked at once, with a note that no deploy ran. Otherwise the issue keeps waiting, untouched.
 2. runs the exact check in the issue's *Verify after deploy* section against the deployed app. It only reads: a check that would write data or change a setting, or that needs a secret the session lacks, is skipped and left for a person.
 3. **passes**: closes the issue with the evidence (the check, what it showed, the live commit and the time).
 4. **fails**: comments what the check showed against what it had to show, and swaps `verify-after-deploy` for `needs-info`. You decide on a fix with `/agent-pipeline:plan <n>`. The PR is not reverted.

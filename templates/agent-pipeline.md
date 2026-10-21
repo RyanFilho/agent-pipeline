@@ -25,7 +25,7 @@ A setting left out of this file takes its default, which is how the pipeline beh
 - **Visual QA:** `required` <!-- default: check each touched screen in every theme and at phone, tablet and desktop widths. Or none: the project has no UI, or does not gate on rendered checks -->
 - **Verify after deploy:** `off` <!-- default: every issue closes when its PR merges. Or on: an issue whose "Verify after deploy" section is filled in stays open after the merge, labelled verify-after-deploy, until /agent-pipeline:verify sees that check pass against the deployed app -->
 - **Deployed app:** `<https://app.example.com>` <!-- only when Verify after deploy is on: the base URL the checks run against -->
-- **Deployed version:** `workflow <deploy.yml>` <!-- only when Verify after deploy is on: how /agent-pipeline:verify tells which commit is live. workflow <file>: the latest successful run of that workflow on the default branch. Or command <cmd>: a read-only command that prints the live commit SHA, such as curl -s <url>/version -->
+- **Deployed version:** `workflow <deploy.yml>` <!-- only when Verify after deploy is on: how /agent-pipeline:verify tells which commit is live. workflow <file>, <file>: every workflow that deploys from the default branch, each live at its latest successful run; verify reads each one's path filters from the workflow file and waits only on the ones a merge touched. Or command <cmd>: a read-only command that prints the live commit SHA, such as curl -s <url>/version when the app serves its build SHA there -->
 - **No CI checks:** `blocked` <!-- default: a PR on which no CI check runs is not merged. Or green: CI is path-filtered, so a PR with no checks (docs, agent config) counts as green -->
 
 ## Labels
