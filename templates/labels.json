@@ -2,6 +2,8 @@
   { "name": "ready-for-agent", "color": "0E8A16", "description": "Fully specified: an agent can ship it from the body alone" },
   { "name": "in-progress", "color": "FBCA04", "description": "Claimed by a pipeline session; do not start it" },
   { "name": "needs-info", "color": "D876E3", "description": "Not ready: waiting on an answer or a better brief from a person" },
+  { "name": "needs-approval", "color": "E99695", "description": "Waits on the user: a plan or a danger zone to approve" },
+  { "name": "plan-approved", "color": "BFD4F2", "description": "The user approved this plan; the pipeline may build it" },
   { "name": "blocked", "color": "B60205", "description": "Waiting on another issue or an outside change" },
   { "name": "deferred", "color": "C5DEF5", "description": "Agreed, but not now" },
   { "name": "ready-for-human", "color": "1D76DB", "description": "Needs a person: a judgement, access or a decision an agent cannot make" },
