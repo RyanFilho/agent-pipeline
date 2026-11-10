@@ -1,7 +1,7 @@
 {
   "name": "agent-pipeline",
   "displayName": "Agent Pipeline",
-  "description": "Run feature work as planner, dispatcher, developer and reviewer Claude Code sessions, with GitHub Issues as the message bus.",
+  "description": "Drive a ticket from plan to a reviewed pull request: a lead session runs planner, developer and reviewer lanes, with GitHub Issues as the message bus, and stops only for approvals, questions and danger zones.",
   "author": {
     "name": "RyanFilho",
     "url": "https://github.com/RyanFilho"

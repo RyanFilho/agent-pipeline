@@ -5,7 +5,7 @@ description: Prepare a repository for the agent pipeline - inspect it, write .cl
 
 # Adopt the agent pipeline
 
-You are preparing this repository so that `/agent-pipeline:plan`, `/agent-pipeline:dispatch`, `/agent-pipeline:ship-issue` and the `agent-pipeline:pr-reviewer` agent can run in it. The plugin's own files are under `${CLAUDE_PLUGIN_ROOT}`.
+You are preparing this repository so that `/agent-pipeline:drive`, `/agent-pipeline:plan`, `/agent-pipeline:implement` and the reviewer agents can run in it. The plugin's own files are under `${CLAUDE_PLUGIN_ROOT}`.
 
 **Change nothing until the user has seen what you found** (step 2). Never push to the default branch, never touch `.claude/settings.local.json`, and leave the user's uncommitted work alone.
 
@@ -38,19 +38,22 @@ Find out each of these, and note where the answer came from:
 | Labels every issue must carry | the docs, and the `labels:` in existing issue templates. Without a rule there, propose the pipeline's own: one `type:`, one `area:` and one priority |
 | Issue templates | `.github/ISSUE_TEMPLATE/` |
 | Instructions | `CLAUDE.md` (line count, and its size in bytes from `git cat-file -s HEAD:CLAUDE.md`; about 4 bytes make a token), `.claude/rules/`, `.claude/settings.json`, any existing commit hook |
-| Working agreement | rules in `CLAUDE.md` or contributing docs that tell agents not to commit, push or run tests unless asked. `/agent-pipeline:ship-issue` contradicts them, so they need an exception |
+| Working agreement | rules in `CLAUDE.md` or contributing docs that tell agents not to commit, push or run tests unless asked. `/agent-pipeline:implement` contradicts them, so they need an exception |
 | Domain docs | a glossary (`CONTEXT.md`, `GLOSSARY.md`), ADRs (`docs/adr/`), specs (`docs/specs/`) |
 | CI filters | `paths-ignore` or path filters on the PR and deploy workflows |
 | Test cadence | `CLAUDE.md` or contributing docs that say when tests run. Suites that are slow or costly to run argue for `end-only`; otherwise keep the default, `inner-loop` |
 | Visual QA | whether the project has a UI, and whether its docs gate on rendered or browser checks. No UI, or docs that rule those checks out, means `none`; otherwise keep the default, `required` |
 | Verify after deploy | criteria or docs that only the deployed app can settle: a live endpoint, a production setting, seeded data. If issues often wait on such a check, suggest `on`; otherwise keep the default, `off` |
 | No CI checks | `paths:` or `paths-ignore:` on the workflows that run on pull requests. If some PRs (docs, `.claude/`) get no checks at all, suggest `green`; otherwise keep the default, `blocked` |
+| Merge | whether the user wants a person to merge every PR. Keep the default, `human`, unless they ask for `auto` |
+| Reviews | keep the default, `spec, code, security`. A project with no runtime surface (docs, a static site) can drop `security` |
+| Danger zones | paths where a wrong change is costly or hard to undo: migrations and seeds, auth, payments, infrastructure and deploy config, `.github/workflows/`, dependency manifests, public API contracts. Propose only the ones this repository has, with their real paths |
 | Open issues | `gh issue list --state open --limit 200 --json number,title,labels`. Agents take only issues labelled `ready-for-agent`, so existing ones wait until the user runs `/agent-pipeline:plan <n>` on them |
 | Deployed app, deployed version | only when *Verify after deploy* is `on`: the production URL in the README, the deploy workflow or its environment. For the version, list every workflow that deploys on push to the default branch: `workflow <file>`, or `workflow <file>, <file>` when there are several. When there is more than one, or one filters by `paths:` or `paths-ignore:`, say that verify waits only on the workflows a merge's files touch. Then offer the other form too: `command <cmd>` reading a `/version` route that serves the build's commit SHA, which the project would add if it lacks one. If the app already serves its SHA, suggest `command` |
 
 ## 2. Show the findings, and ask once
 
-Show one table of what you will write into `.claude/agent-pipeline.md`, and mark each value *found* or *guessed*. Then ask, in one batch, for everything guessed: the commands, the merge method, the areas to serialise, the labels that get an Opus review, any Workflow setting you would move off its default, and the project's **gates**, meaning rules every PR must meet that the reviewer will check. Offer gates you saw in the docs as suggestions.
+Show one table of what you will write into `.claude/agent-pipeline.md`, and mark each value *found* or *guessed*. Then ask, in one batch, for everything guessed: the commands, the merge method, the areas to serialise, the labels that get an Opus review, any Workflow setting you would move off its default, the **danger zones** (every hit stops the pipeline for the user, so the list stays short), and the project's **gates**, meaning rules every PR must meet that the reviewer will check. Offer gates you saw in the docs as suggestions.
 
 Also list what step 3 will change, so the user can strike items: labels to rename and to create, templates to add (and whether they want the optional *Human check* template), the CLAUDE.md exception and split, and CI filters.
 
@@ -58,14 +61,14 @@ Also list what step 3 will change, so the user can strike items: labels to renam
 
 Work in a worktree, so the user's checkout is untouched: call `EnterWorktree` with the name `adopt-agent-pipeline`. If it is unavailable, use `git worktree add` from `origin/<default>` with `--no-track`. Then `git switch -c chore/adopt-agent-pipeline origin/<default> --no-track`.
 
-1. **Settings file.** Copy `${CLAUDE_PLUGIN_ROOT}/templates/agent-pipeline.md` to `.claude/agent-pipeline.md` and fill it in from step 2. Delete the HTML comments, and keep it short: every pipeline session reads it. On an update, add any missing Workflow setting with its default, unless step 2 agreed otherwise. An older setup used a `needs-triage` label as a gate before agents: drop it from the settings and the templates' `labels:`, and leave the label itself and its open issues to the user, who readies them with `/agent-pipeline:plan <n>`.
+1. **Settings file.** Copy `${CLAUDE_PLUGIN_ROOT}/templates/agent-pipeline.md` to `.claude/agent-pipeline.md` and fill it in from step 2. Delete the HTML comments, and keep it short: every pipeline session reads it. On an update, add any missing Workflow setting with its default, unless step 2 agreed otherwise, and the *Danger zones* section and the `needs-approval` and `plan-approved` label rows if they are missing. An older setup that merged every approved PR itself had no *Merge* setting: ask whether to keep that with `auto`, or move to `human`. An older setup used a `needs-triage` label as a gate before agents: drop it from the settings and the templates' `labels:`, and leave the label itself and its open issues to the user, who readies them with `/agent-pipeline:plan <n>`.
 2. **Permissions.** Merge the template into `.claude/settings.json`. Use a command prefix that stays the same across runs (`npm run build`, `dotnet test`); pass an empty value when there is none, and that entry is dropped:
 
    ```bash
    node "${CLAUDE_PLUGIN_ROOT}/scripts/merge-settings.mjs" --template "${CLAUDE_PLUGIN_ROOT}/templates/settings.json" --target .claude/settings.json --set MERGE_METHOD=<--merge> --set DEFAULT_BRANCH=<main> --set "BUILD_COMMAND_PREFIX=<prefix>" --set "TEST_COMMAND_PREFIX=<prefix>" --dry-run
    ```
 
-   Show the dry run, then run it again without `--dry-run`. Existing entries are kept, and `advisorModel` is added only if absent. The merge also registers this plugin's marketplace and enables the plugin in the project, so a teammate who clones the repository and trusts the folder gets the plugin too. If the plugin was installed from a fork, change `extraKnownMarketplaces` to point at that fork. If the settings map a type to a branch prefix other than `feat`, `fix`, `chore` or `docs`, add the matching `git push` allow entries by hand.
+   Show the dry run, then run it again without `--dry-run`. Existing entries are kept, and `advisorModel` is added only if absent. The merge also registers this plugin's marketplace and enables the plugin in the project, so a teammate who clones the repository and trusts the folder gets the plugin too. If the plugin was installed from a fork, change `extraKnownMarketplaces` to point at that fork. If the settings map a type to a branch prefix other than `feat`, `fix`, `chore` or `docs`, add the matching `git push` and `git switch` allow entries by hand. Lanes run with no user in them, so a command missing from the allow list stalls a lane on a prompt nobody sees.
 3. **Labels.** Once the user agrees:
    - **Rename** each existing label that plays a pipeline role to the pipeline's name, so open issues keep it and no mapping is needed: `gh label edit "<old>" --name "<new>" --description "<text>"`. If the user wants to keep a name (other tools rely on it, say), record a mapping in the settings file instead.
    - **Create** each label still missing: `gh label create "<name>" --color <hex> --description "<text>"`, and the `area:` labels agreed in step 2. Skip `verify-after-deploy` unless that setting is `on`.
@@ -74,7 +77,7 @@ Work in a worktree, so the user's checkout is untouched: call `EnterWorktree` wi
    - *Verify after deploy* `on`: append `${CLAUDE_PLUGIN_ROOT}/templates/verify-after-deploy-field.yml`, without its comment, to the end of each template's `body:`.
    - *Visual QA* `none`: drop the screens, themes and widths from the *Verify* field's description and placeholder.
    - If the user wants it, copy `${CLAUDE_PLUGIN_ROOT}/templates/human-check.yml`, without its comment, to `.github/ISSUE_TEMPLATE/human-check.yml`. It files `ready-for-human` checks, which agents never take.
-5. **CLAUDE.md.** If there is none, suggest `/init` first, or create one with just the section below. If step 1 found a working agreement that tells agents not to commit, push or run tests unless asked, add this line right under that rule: *`/agent-pipeline:ship-issue` is an explicit request to build, test, commit, push and open a PR: an exception to this rule, for that session only.*
+5. **CLAUDE.md.** If there is none, suggest `/init` first, or create one with just the section below. If step 1 found a working agreement that tells agents not to commit, push or run tests unless asked, add this line right under that rule: *`/agent-pipeline:implement` is an explicit request to build, test, commit, push and open a PR: an exception to this rule, for that session only.*
 
    If the file is over about 200 lines, offer to split it, and put the cost in the offer: *about <size ÷ 4, in k> tokens, loaded by every developer and reviewer session*. Proceed only if the user agrees:
    - Group its sections by the files they are about.
@@ -103,8 +106,9 @@ The PR body lists what changed and the values that were guessed. Do not merge it
 Tell the user, in a few lines:
 
 - merge the PR, then work from an up-to-date checkout of the default branch
-- `/agent-pipeline:plan <idea>` in a session at the strongest model and high effort, to file `ready-for-agent` issues, or `/agent-pipeline:plan <n> <n>` to make existing issues ready
-- `/agent-pipeline:dispatch` in a session at medium effort, in the permission mode the developers should use
+- `/agent-pipeline:drive <issue number or idea>` in a session at the strongest model and high effort, in the permission mode the lanes should use: it plans the ticket, asks for approval, then builds and reviews it, and stops at a pull request ready to merge
+- `/agent-pipeline:drive` with no argument, to build every issue already labelled `ready-for-agent`
+- `/agent-pipeline:plan <idea>` to plan in conversation instead, or `/agent-pipeline:plan <n> <n>` to make existing issues ready
 - when *Verify after deploy* is `on`: `/agent-pipeline:verify` after each deploy, by hand or as a scheduled task, to close the issues waiting on one
 
 Once the PR is merged, remove the worktree: `ExitWorktree` with remove, or `git worktree remove <path>` if you used `git worktree add`. Removal can fail and leave the folder behind with a stale `.git` file while git no longer lists the worktree. If it does, tell the user and, with their go-ahead, delete that folder, then run `git worktree prune` and `git branch -D chore/adopt-agent-pipeline`.
